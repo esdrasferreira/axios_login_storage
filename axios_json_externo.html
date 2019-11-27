@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>AJAX com arquivos externos</title>
+  </head>
+  <body>
+    <button id="btn">Pegar dados</button>
+    <div id="resultado"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script type="module">
+      import { Categoria } from "./categoria.js";
+      document
+        .querySelector("#btn")
+        .addEventListener("click", () => montaTela());
+
+      const createUl = () => {
+        const ul = document.createElement("ul"); //cria a tag HTML <ul>
+        return ul; //retorna para quem for usar
+      };
+
+      const createLi = categoria => {
+        const li = document.createElement("li"); //cria o elemento HTML <li>
+        //coloca o conteúdo dentro da tag <li>
+        li.textContent = `ID: ${categoria.id} - Nome: ${categoria.nome}`;
+        li.setAttribute("id", categoria.id); //cria um id para cada tag <li>
+        //li.setAttribute("onclick",`alert('${categoria.id}')`); //cria um id para cada tag <li>
+        return li; //retorna para quem for usar
+      };
+
+      const appendToDOM = categorias => {
+        const resultado = document.getElementById("resultado"); //pega o elemento div de id=categoria
+        //chama a criação da tag <ul>
+        const ul = createUl();
+
+        //faz um loop bucando cada categoria que vem do AJAX
+        categorias.map(categoria => {
+          let li = createLi(categoria); //monta a tag <li> com cada categoria passada
+          ul.appendChild(li); //adiciona a nova <li> na tag <ul>
+        });
+        resultado.appendChild(ul); //adiciona a tag <ul> na tag <div id="categoria">...
+      };
+
+      var montaTela = async () => {
+        let categoria = new Categoria();
+        let resposta = await categoria.getCategorias();
+
+        let saida = resposta;
+
+        if (resposta.data != null && resposta.data.length > 0) {
+          saida = "";
+
+          appendToDOM(resposta.data);
+
+          // resposta.data.forEach(categoria => {
+
+          //     saida += "<ul>"
+          //     saida += '<li> ID: ' + categoria.id + '</li>'
+          //     saida += '<li> Nome: ' + categoria.nome + '</li>'
+          //     //saida += `<li> Nome: ${categoria.nome} </li>`
+          //     saida += "</ul>"
+
+          // });
+        } else {
+          document.getElementById("resultado").innerHTML = saida;
+        }
+      };
+    </script>
+  </body>
+</html>

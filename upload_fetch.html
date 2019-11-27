@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="formulario" enctype="multipart/form-data">
+        <input type="file" id="arquivo" name="arquivo"><br>
+        <button type="submit">Enviar </button>
+    </form>
+
+
+    <script>
+        var form = document.forms.namedItem("formulario");
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            var arquivo = document.getElementById("arquivo");
+            var file = arquivo.files[0];
+
+            const formDate = new FormData();
+
+            formDate.append("imagem", file);
+
+            fetch("https://javaworld.com.br/produto/upload", {
+                method: 'POST',
+                body: formDate,
+            })
+                .then(response => {
+                    console.log(response.json())
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        });
+
+    </script>
+
+</body>
+
+</html>

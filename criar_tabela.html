@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Conhecendo o AJAX (Asynchronous JavaScript And XML)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+</head>
+
+<body>
+  <!-- <button id="btn">Pegar uma informação</button> -->
+  <div id="resultado"></div>
+
+  <script type="module">
+
+    /* INICIO MONTA TELA CATEGORIA*/
+    import { Categoria } from "./categoria.js";
+
+    var data = {};
+
+    document;
+    window.addEventListener("load", () => montaTela());
+
+    const createTable = () => {
+      let element = document.createElement("table");
+      element.className = "table table-striped table-dark";
+      element.id = "tabela";
+      element.border = "1";
+      element.appendChild(tableHead());
+
+      return element;
+    };
+
+    const tableBody = () => {
+      let tableBody = document.createElement("tbody");
+    };
+
+    const tableHead = () => {
+      let thead1 = document.createElement("thead");
+      thead1.className = "thead-dark";
+      let tr1 = document.createElement("tr");
+      let th1 = document.createElement("th");
+      th1.scope = "col";
+      th1.innerHTML = "ID";
+      let th2 = document.createElement("th");
+      th2.scope = "col";
+      th2.innerHTML = "Produto";
+      let th3 = document.createElement("th");
+      th3.scope = "col";
+      th3.innerHTML = "Atualizar";
+      let th4 = document.createElement("th");
+      th4.scope = "col";
+      th4.innerHTML = "Deletar";
+      tr1.appendChild(th1);
+      tr1.appendChild(th2);
+      tr1.appendChild(th3);
+      tr1.appendChild(th4);
+      thead1.appendChild(tr1);
+
+      return thead1;
+    };
+
+    const createTr = () => {
+      const tr = document.createElement("tr");
+      return tr;
+    };
+
+    const createButtonUpdate = categoria => {
+      const element = document.createElement("button");
+      element.id = `button-${categoria.id}`;
+      element.className = "btn btn-primary";
+      element.innerHTML = "Atualizar";
+      element.addEventListener("click", () => {
+        recriateTable(); //recria tudo novamente, usando o cache
+        changeButton(categoria.id); //muda o botão
+        changeToField(categoria); //cria o campo de texto
+      });
+
+      return element;
+    };
+
+    const createButtonDelete = categoria => {
+      const element = document.createElement("button");
+      element.id = `button-${categoria.id}`;
+      element.className = "btn btn-danger";
+      element.innerHTML = "Deletar";
+      element.addEventListener("click", () => {
+        deletar(categoria.id);
+        recriateTable(); //recria tudo novamente, usando o cache
+      });
+
+      return element;
+    };
+
+    const recriateTable = () => {
+      let resultado = document.getElementById("resultado");
+      resultado.innerHTML = ""; //limpa
+
+      appendToDOM(data);
+    };
+
+    const formElement = () => {
+      const element = document.createElement("form");
+      element.action = "#";
+      element.id = "formulario";
+      element.addEventListener("submit", () => alert("enviou"));
+      return element;
+    };
+
+    const changeToField = categoria => {
+      const element = document.getElementById(`id-${categoria.id}`);
+      element.innerHTML = ""; //limpa o atual
+      element.appendChild(textField(categoria.nome)); //adiciona o novo
+    };
+
+    const fieldValue = () => {
+      return document.getElementById("nome").value;
+    };
+
+    const deletar = async id => {
+      let categoria = new Categoria();
+      let resultado = await categoria.deletar(id);
+
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].id === id) {
+          data[i].splice(i, 1);
+        }
+      }
+    };
+
+    const atualiza = async id => {
+      const campoNome = document.getElementById("nome").value;
+      let objeto = {};
+      objeto.nome = campoNome;
+      objeto.id = id;
+      let categoria = new Categoria();
+      let resultado = await categoria.atualizar(objeto);
+
+      /* itera dentro de data e quando encontra o id atualiza o data[i].nome para campoNome*/
+
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].id === id) {
+          data[i].nome = campoNome;
+        }
+      }
+      /* **************************************************************/
+      if (resultado.data.editado) {
+        recriateTable(); //chama o cache e ele não esta atualizado
+      }
+    };
+
+    const changeButton = id => {
+      const td = document.getElementById(`btn-${id}`);
+      td.innerHTML = ""; //limpa
+      const element = document.createElement("button");
+      element.id = `upbutton-${id}`;
+      element.className = "btn btn-warning";
+      element.innerHTML = "Confirmar";
+      element.addEventListener("click", () => atualiza(id));
+      td.appendChild(element);
+    };
+
+    const textField = content => {
+      const element = document.createElement("input");
+      element.id = "nome";
+      element.value = content;
+      return element;
+    };
+
+    const createTdTr = categoria => {
+      const tr = createTr();
+
+      const td1 = document.createElement("td");
+      td1.className = "classname";
+      td1.innerHTML = `${categoria.id}`;
+
+      const td2 = document.createElement("td");
+      td2.id = `id-${categoria.id}`;
+      td2.className = "classname";
+      td2.innerHTML = `${categoria.nome}`;
+
+      const td3 = document.createElement("td");
+      td3.id = `btn-${categoria.id}`;
+      td3.className = "classname";
+      td3.appendChild(createButtonUpdate(categoria));
+
+      const td4 = document.createElement("td");
+      td4.id = `btn-${categoria.id}`;
+      td4.className = "classname";
+      td4.appendChild(createButtonDelete(categoria));
+
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+      tr.appendChild(td4);
+
+      return tr;
+    };
+
+    const appendToDOM = categorias => {
+      const resultado = document.getElementById("resultado");
+      const table = createTable();
+
+      categorias.map(categoria => {
+        table.appendChild(createTdTr(categoria));
+      });
+
+      resultado.appendChild(table);
+    };
+
+    var montaTela = async () => {
+      let categoria = new Categoria();
+      let resposta = await categoria.getCategorias();
+      let output = resposta;
+      if (resposta.data != null && resposta.data.length > 0) {
+        data = resposta.data;
+
+        appendToDOM(data);
+      } else {
+        document.getElementById("resultado").innerHTML = output;
+      }
+    };
+
+    /* FIM MONTA TELA CATEGORIA*/
+  </script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

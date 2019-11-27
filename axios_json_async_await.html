@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Axios com Async e Await</title>
+</head>
+<body>
+    <button id="btn">Pegar dados</button>
+    <div id="resultado"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script>
+        
+        document.querySelector('#btn').addEventListener('click', ()=> montaTela())
+
+        var pegarDados = async () => {
+            let resposta
+
+            try{
+                resposta = await axios.get('https://javaworld.com.br/categorias')
+            }catch(e){
+                console.log(e.stack)
+                resposta = e.message
+            }
+
+            return resposta
+
+
+
+
+        }
+            var montaTela = async() =>{
+                let resposta = await pegarDados()
+                let output = resposta
+               
+               if(resposta.data!=null && resposta.data.length>0){
+                   
+                   saida=''
+
+
+                   resposta.data.forEach(categoria => {
+                    saida += '<ul>'
+                     saida += '<li> ID: ' + categoria.id + '</li>'
+                     saida += `<li> Nome: ${categoria.nome} </li>`
+                     saida += '</ul>'
+
+                   });
+                 
+               }
+               document.getElementById('resultado').innerHTML = saida
+            }
+    
+    
+    </script>
+    
+</body>
+</html>
